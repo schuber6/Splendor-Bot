@@ -12,5 +12,6 @@ class Player:
         self.bonuses=np.array([0,0,0,0,0])
         self.VPs=0
         self.reserved=[]
+
     def __repr__(self):
         return 'VPs %s, gems %s, cards %s, reserved %s' % (self.VPs,self.gems,self.bonuses, self.reserved)

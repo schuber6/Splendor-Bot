@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Feb 21 15:29:54 2019
+Created on Sat Mar  9 17:37:47 2019
 
 @author: huber.288
 """
+
 from InputVector import *
 import numpy as np
 import pickle
@@ -11,22 +12,25 @@ from NeuralNet import *
 import torch
 from copy import deepcopy
 Gs=pickle.load(open( "GemCombos.p", "rb" ))
-MType=pickle.load(open( "MoveType.p", "rb" ))
+MType=pickle.load(open( "MType_Full.p", "rb" ))
 
 def MakeMove(Game,playern,Player,NN,Levels):
     #IV=InputVector_Simple(Game,46)
     #NN=Neural_Network([len(IV),30,26],Weights)
     #Out=NN(torch.FloatTensor(IV))
     #Out=np.array(Out)
-    #Out=np.random.rand(26)   #Replace NN output with random vector
-    #GMoves=RankMoves(Out,Game,Player,playern)
+    Out=np.random.rand(26)   #Replace NN output with random vector
+    GMoves=RankMoves(Out,Game,Player,playern)
     #if GMoves:
     #    MakeMove_GMove(Game,playern,GMoves[0])
     #else:
     #    MakeMove_GMove(Game,playern,[])
 
-    _,GMove=MakeMove_TreeSearch(Game,playern,Player,NN,Levels)
-    MakeMove_GMove(Game,playern,GMove)
+    #_,GMove=MakeMove_TreeSearch(Game,playern,Player,NN,Levels)
+    if GMoves:
+        MakeMove_GMove(Game,playern,GMoves[0])
+    else:
+        print('No Moves')
         
 def MakeMove_GMove(Game,playern,GMove):  
     if not GMove:
@@ -35,11 +39,11 @@ def MakeMove_GMove(Game,playern,GMove):
     if GMove[0]==1:
         Game.TakeGems(playern,GMove[2])
         return Game
-    if GMove[0]==2:
-        Game.BuyCard(playern,GMove[1],GMove[2])
+    if GMove[0]>=2 and GMove[0]<=4:
+        Game.BuyCard(playern,GMove[1][0],GMove[1][1],GMove[2])
         return Game
-    if GMove[0]==3:
-        Game.ReserveCard(playern,GMove[1],GMove[2])
+    if GMove[0]==5:
+        Game.ReserveCard(playern,GMove[1][0],GMove[1][1],GMove[2])
         return Game
     
 def RankMoves(Out,Game,Player,playern): #Ranks top 10 moves based on "Out" values.  For each move, entry 0 is move type, entry 1 is the card, entry 2 is the gems
@@ -55,13 +59,34 @@ def RankMoves(Out,Game,Player,playern): #Ranks top 10 moves based on "Out" value
                 A.append([])
                 A.append(gems)
                 GMoves.append(A)
-        if MType[i]==2 and i<len(Game.cards):  #Buy Card
-            cardn=i
-            gems=list(Game.cards[i].cost)
+        if MType[i]==2 and i<len(Game.cards[0]):  #Buy Card
+            deckn=0
+            cardn=i-8
+            gems=list(Game.cards[deckn][cardn].cost)
             gems.append(0)
             gems=np.array(gems)
-            if Game.CheckBuy(playern,cardn,gems):
-                A.append(cardn)
+            if Game.CheckBuy(playern,deckn,cardn,gems):
+                A.append([deckn,cardn])
+                A.append(gems)
+                GMoves.append(A)
+        if MType[i]==3 and i<len(Game.cards[1]):  #Buy Card
+            deckn=1
+            cardn=i-4
+            gems=list(Game.cards[deckn][cardn].cost)
+            gems.append(0)
+            gems=np.array(gems)
+            if Game.CheckBuy(playern,deckn,cardn,gems):
+                A.append([deckn,cardn])
+                A.append(gems)
+                GMoves.append(A)
+        if MType[i]==4 and i<len(Game.cards[2]):  #Buy Card
+            deckn=0
+            cardn=i
+            gems=list(Game.cards[deckn][cardn].cost)
+            gems.append(0)
+            gems=np.array(gems)
+            if Game.CheckBuy(playern,deckn,cardn,gems):
+                A.append([deckn,cardn])
                 A.append(gems)
                 GMoves.append(A)
     return GMoves

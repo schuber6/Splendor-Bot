@@ -1,39 +1,45 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Feb 25 16:52:00 2019
+Created on Fri Mar  1 18:27:50 2019
 
 @author: huber.288
-
 """
+
+
 import torch
 import torch.nn as nn
 
-class Neural_Network(nn.Module):
+class Neural_Network2(nn.Module):
     def __init__(self, LayerSizes, Weights):
-        super(Neural_Network, self).__init__()
+        super(Neural_Network2, self).__init__()
         # parameters
         # TODO: parameters can be parameterized instead of declaring them here
-        self.inputSize = LayerSizes[0]
-        self.outputSize = LayerSizes[2]
-        self.hiddenSize = LayerSizes[1]
+        self.LayerSizes = LayerSizes
         
         # weights
         if not Weights:
-            self.W1 = torch.randn(self.inputSize, self.hiddenSize) # 3 X 2 tensor
-            self.W2 = torch.randn(self.hiddenSize, self.outputSize) # 3 X 1 tensor
+            W=[]
+            for i in range(len(LayerSizes)-1):
+                W.append(torch.randn(self.LayerSizes[i]+1, self.LayerSizes[i+1])) # 3 X 2 tensor
+            self.W=W
         else:
-            self.W1=Weights[0]
-            self.W2=Weights[1]
+            self.W=Weights
             
     def forward(self, X):
-        self.z = torch.matmul(X, self.W1) # 3 X 3 ".dot" does not broadcast in PyTorch
-        self.z2 = self.sigmoid(self.z) # activation function
-        self.z3 = torch.matmul(self.z2, self.W2)
-        o = self.sigmoid(self.z3) # final activation function
-        return o
+        res=X
+        for ind, i in enumerate(self.W):
+            res = torch.matmul(torch.cat((torch.FloatTensor([1]),res)), i) # Add offset value
+            if ind<len(self.W):
+                res = self.Relu(res) # activation function
+            else:
+                res = self.sigmoid(res)
+        return res
         
     def sigmoid(self, s):
         return 1 / (1 + torch.exp(-s))
+    
+    def Relu(self,s):
+        return (s+abs(s))/2
     
     def sigmoidPrime(self, s):
         # derivative of sigmoid

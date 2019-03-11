@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Created on Fri Mar  8 16:16:12 2019
+
+@author: huber.288
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Tue Feb  5 16:10:52 2019
 
 @author: huber.288
@@ -11,7 +18,7 @@ import numpy as np
 from InitializeRandomCards import *
 from MakeMove import *
 
-filename = 'Cards'
+filename = 'Cards_Full'
 filename2 = 'Nobles'
 infile = open(filename2,'rb')
 Noble = pickle.load(infile)
@@ -20,9 +27,11 @@ infile.close()
 
 
 
-class Splendor:
-    def __init__(self, nplayers, CType):
-        if CType==0:
+class Splendor_Full:
+    def __init__(self, nplayers):
+        CType=2
+        if CType==2:
+            filename = 'Cards_Full'
             infile = open(filename,'rb')
             self.Card = pickle.load(infile)
             infile.close()
@@ -41,12 +50,13 @@ class Splendor:
         self.winner=[]
         for i in range(nplayers):
             self.player.append(Player())
-        self.cards=[]
+        self.cards=[[],[],[]]
         self.nobles=[]
         self.ShuffleCards()
         self.ShuffleNobles()
         for i in range(4):
-            self.DealCard()
+            for i2 in range(3):
+                self.DealCard(i2)
         for i in range(nplayers+1):
             self.DealNoble()
         self.ShuffleNobles()
@@ -54,13 +64,15 @@ class Splendor:
         
         
     def ShuffleNobles(self):
-        self.nobledeck=np.random.permutation(10)
+        self.nobledeck=np.random.permutation(len(Noble))
     def ShuffleCards(self):
-        self.deck=np.random.permutation(4)
-    def DealCard(self):
-        if len(self.deck)>0:
-            self.cards.append(self.Card[self.deck[0]])
-            self.deck=self.deck[1:]
+        self.deck=[]
+        for i in range(len(self.Card)):
+            self.deck.append(np.random.permutation(len(self.Card[i])))
+    def DealCard(self,deckn):
+        if len(self.deck[deckn])>0:
+            self.cards[deckn].append(self.Card[deckn][self.deck[deckn][0]])
+            self.deck[deckn]=self.deck[deckn][1:]
     def DealNoble(self):
         self.nobles.append(Noble[self.nobledeck[0]])
         self.nobledeck=self.nobledeck[1:]
@@ -69,30 +81,30 @@ class Splendor:
         
         
     #Actions    
-    def BuyCard(self,playern,cardn,gems):  
-        if self.CheckBuy(playern,cardn,gems)==0:
+    def BuyCard(self,playern,deckn,cardn,gems):  
+        if self.CheckBuy(playern,deckn,cardn,gems)==0:
             print('Can\'t Buy That')
             return
         self.gems+=gems
         self.player[playern].gems-=gems
-        self.player[playern].bonuses[self.cards[cardn].bonus]+=1
-        self.player[playern].VPs+=self.cards[cardn].VPs
-        del self.cards[cardn]
-        self.DealCard()
+        self.player[playern].bonuses[self.cards[deckn][cardn].bonus]+=1
+        self.player[playern].VPs+=self.cards[deckn][cardn].VPs
+        del self.cards[deckn][cardn]
+        self.DealCard(deckn)
         nob=self.CheckNoble(playern)
         if nob:
             self.player[playern].VPs+=self.nobles[nob[0]].VPs   #TODO:  Allow choosing of noble in case of multiple
             del self.nobles[nob[0]]
-    def ReserveCard(self,playern,cardn,gems):
-        if self.CheckReserve(playern,gems):
+    def ReserveCard(self,playern,deckn,cardn,gems):
+        if self.CheckReserve(playern,deckn,cardn,gems):
             self.gems-=gems
             self.player[playern].gems+=gems
         else:
             print('Illegal Reserve')
             return
-        self.player[playern].reserved.append(self.cards[cardn])
-        del self.cards[cardn]
-        self.DealCard()
+        self.player[playern].reserved.append(self.cards[deckn][cardn])
+        del self.cards[deckn][cardn]
+        self.DealCard(deckn)
     def TakeGems(self,playern,gems):
         if self.CheckGems(playern,gems)==0:
             print('Illegal Gems')
@@ -100,16 +112,17 @@ class Splendor:
         self.gems-=gems
         self.player[playern].gems+=gems
         
-    def CheckBuy(self,playern,cardn,gems):
+    def CheckBuy(self,playern,deckn,cardn,gems):
         if min(self.player[playern].gems-gems)<0: return 0
         if not min(gems%1==[0,0,0,0,0,0]): return 0
         if min(gems)<0: return 0
-        Req=self.cards[cardn].cost-self.player[playern].bonuses
+        Req=self.cards[deckn][cardn].cost-self.player[playern].bonuses
         Dif=Req-gems[:5]
         Dif=np.maximum(Dif,[0,0,0,0,0])
         if sum(Dif)-gems[5]>0: return 0
         return 1
-    def CheckReserve(self,playern,gems):
+    def CheckReserve(self,playern,deckn,cardn,gems):
+        if len(self.cards[deckn])-1<cardn: return 0
         if len(gems)!=6: return 0
         if gems[5]>1: return 0 
         if min(self.gems-gems)<0: return 0
@@ -166,7 +179,8 @@ class Splendor:
         if not self.winner:
             st=''
             for i in range(len(self.cards)):
-                st+=str(self.cards[i]) + '; '
+                for i2 in range(len(self.cards[i])):
+                    st+=str(self.cards[i][i2]) + '; '
             nst=''
             for i in self.nobles:
                 nst+=str(i)+'; '

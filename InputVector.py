@@ -10,7 +10,7 @@ from Splendor import *
 from SplendorCard import *
 from Player import *
 
-def InputVector_Simple(Game):
+def InputVector_Simple(Game,L):
     IVlist=[]
     IVlist.extend(Game.gems)
     IVlist.extend(Game.player[0].gems)
@@ -20,5 +20,9 @@ def InputVector_Simple(Game):
         IVlist.extend(card.cost)
         IVlist.append(card.bonus)
         IVlist.append(card.VPs)
+    
+    while len(IVlist)<L:  #Make sure IV is padded with 0s if cards are gone
+        IVlist.append(0)
+        
     IV=np.array(IVlist)
     return IV

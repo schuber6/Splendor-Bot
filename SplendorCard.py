@@ -13,4 +13,4 @@ class SplendorCard:
         self.cost=np.array(Cost)
         
     def __repr__(self):
-        return 'VPs %s, Bonus %s, cost %s' % (self.bonus,self.VPs,self.cost)
+        return 'VPs %s, Bonus %s, cost %s' % (self.VPs,self.bonus,self.cost)
