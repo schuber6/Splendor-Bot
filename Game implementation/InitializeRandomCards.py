@@ -12,10 +12,16 @@ Created on Tue Feb  5 16:29:39 2019
 @author: huber.288
 """
 
+
 from SplendorCard import *
 import pickle
 import numpy as np
-Gs=pickle.load(open( "GemCombos.p", "rb" ))
+
+import os
+cur_path = os.path.dirname(__file__)
+new_path = os.path.relpath('..\\Game Data\\GemCombos.p', cur_path)
+Gs=pickle.load(open( new_path, "rb" ))  # Wanted to load based on relative path so this would work on other computers
+#Gs=pickle.load(open( "GemCombos.p", "rb" ))
 
 def MakeCards():
     Card=[]

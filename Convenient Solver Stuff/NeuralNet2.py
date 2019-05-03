@@ -8,6 +8,8 @@ Created on Fri Mar  1 18:27:50 2019
 
 import torch
 import torch.nn as nn
+from copy import deepcopy
+import numpy as np
 
 class Neural_Network2(nn.Module):
     def __init__(self, LayerSizes, Weights):
@@ -29,10 +31,10 @@ class Neural_Network2(nn.Module):
         res=X
         for ind, i in enumerate(self.W):
             res = torch.matmul(torch.cat((torch.FloatTensor([1]),res)), i) # Add offset value
-            if ind<len(self.W):
+            if ind<len(self.W)-1:
                 res = self.Relu(res) # activation function
-            else:
-                res = self.sigmoid(res)
+            #else:
+                #res = self.sigmoid(res)
         return res
         
     def sigmoid(self, s):
@@ -68,5 +70,24 @@ class Neural_Network2(nn.Module):
         print ("Predicted data based on trained weights: ")
         print ("Input (scaled): \n" + str(xPredicted))
         print ("Output: \n" + str(self.forward(xPredicted)))
-
+        
+    def addHiddenNeuron(self,layer):  #Adds randomely initialized hidden neuron to chosen layer (layer 0 is the first hidden layer)
+        Wi=self.W[layer]
+        Extra=torch.randn(Wi.shape[0],1)
+        Wi=torch.cat((Wi,Extra),dim=1)
+        self.W[layer]=Wi
+        Wo=self.W[layer+1]
+        Extra=torch.randn(1,Wo.shape[1])
+        Wo=torch.cat((Wo,Extra),dim=0)
+        self.W[layer+1]=Wo
+        self.LayerSizes[layer+1]=self.LayerSizes[layer+1]+1
+        
+    def deleteHiddenNeuron(self,layer):
+        nn=self.LayerSizes[layer+1]
+        r=np.random.randint(0,nn)
+        Wi=deepcopy(self.W[layer])
+        self.W[layer]=torch.cat((Wi[:,:r],Wi[:,r+1:]),dim=1)
+        Wo=deepcopy(self.W[layer+1])
+        self.W[layer+1]=torch.cat((Wo[:r,:],Wo[r+1:,:]),dim=0)
+        self.LayerSizes[layer+1]=self.LayerSizes[layer+1]-1
 

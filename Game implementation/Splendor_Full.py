@@ -11,16 +11,24 @@ Created on Tue Feb  5 16:10:52 2019
 
 @author: huber.288
 """
+
+import sys
+sys.path.append('../Game implementation')
+sys.path.append('../Convenient Solver Stuff')
 from SplendorCard import *
 from Player import *
 import pickle
 import numpy as np
 from InitializeRandomCards import *
 from MakeMove import *
+import os
+cur_path = os.path.dirname(__file__)
+new_path1 = os.path.relpath('..\\Game Data\\Nobles', cur_path)
+new_path2 = os.path.relpath('..\\Game Data\\Cards_Full', cur_path)
 
 filename = 'Cards_Full'
 filename2 = 'Nobles'
-infile = open(filename2,'rb')
+infile = open(new_path1,'rb')
 Noble = pickle.load(infile)
 infile.close()
 
@@ -29,14 +37,10 @@ infile.close()
 
 class Splendor_Full:
     def __init__(self, nplayers):
-        CType=2
-        if CType==2:
-            filename = 'Cards_Full'
-            infile = open(filename,'rb')
-            self.Card = pickle.load(infile)
-            infile.close()
-        if CType==1:
-            self.Card=MakeCards()
+        filename = 'Cards_Full'
+        infile = open(new_path2,'rb')
+        self.Card = pickle.load(infile)
+        infile.close()
         self.nplayers=nplayers
         if nplayers==1:
             self.gems=np.array([4,4,4,4,4,5])

@@ -4,16 +4,22 @@ Created on Tue Feb  5 16:10:52 2019
 
 @author: huber.288
 """
+
+import sys
+sys.path.append('../Game implementation')
+sys.path.append('../Convenient Solver Stuff')
 from SplendorCard import *
 from Player import *
 import pickle
 import numpy as np
 from InitializeRandomCards import *
 from MakeMove import *
+import os
+cur_path = os.path.dirname(__file__)
+new_path1 = os.path.relpath('..\\Game Data\\Nobles', cur_path)
+new_path2 = os.path.relpath('..\\Game Data\\Cards', cur_path)
 
-filename = 'Cards'
-filename2 = 'Nobles'
-infile = open(filename2,'rb')
+infile = open(new_path1,'rb')
 Noble = pickle.load(infile)
 infile.close()
 
@@ -23,7 +29,7 @@ infile.close()
 class Splendor:
     def __init__(self, nplayers, CType):
         if CType==0:
-            infile = open(filename,'rb')
+            infile = open(new_path2,'rb')
             self.Card = pickle.load(infile)
             infile.close()
         if CType==1:
@@ -84,7 +90,7 @@ class Splendor:
             self.player[playern].VPs+=self.nobles[nob[0]].VPs   #TODO:  Allow choosing of noble in case of multiple
             del self.nobles[nob[0]]
     def ReserveCard(self,playern,cardn,gems):
-        if self.CheckReserve(playern,gems):
+        if self.CheckReserve(playern,cardn,gems):
             self.gems-=gems
             self.player[playern].gems+=gems
         else:
@@ -101,6 +107,9 @@ class Splendor:
         self.player[playern].gems+=gems
         
     def CheckBuy(self,playern,cardn,gems):
+        print(len(self.cards))
+        print(cardn+1)
+        if len(self.cards)<cardn+1: return 0
         if min(self.player[playern].gems-gems)<0: return 0
         if not min(gems%1==[0,0,0,0,0,0]): return 0
         if min(gems)<0: return 0
@@ -109,13 +118,15 @@ class Splendor:
         Dif=np.maximum(Dif,[0,0,0,0,0])
         if sum(Dif)-gems[5]>0: return 0
         return 1
-    def CheckReserve(self,playern,gems):
+    
+    def CheckReserve(self,playern,cardn,gems):
         if len(gems)!=6: return 0
         if gems[5]>1: return 0 
         if min(self.gems-gems)<0: return 0
         if min(self.player[playern].gems+gems)<0: return 0
         if sum(self.player[playern].gems+gems)>10: return 0
         if not min(gems%1==[0,0,0,0,0,0]): return 0           #Check if numbers are integers
+        if len(self.cards)<cardn+1: return 0
         s=np.sort(gems[0:5])
         if s[-1]>0: return 0
         return 1
