@@ -25,15 +25,15 @@ from MakeMove import *
 from helper import *
 
 NetSize=[46,35,35,26]
-Steps=30
+Steps=50
 Ngames=10
 Record=1
-GameType=0
+GameType=1
 Levels=1
 loss_fn = torch.nn.MSELoss()
 BestT=4
 BestWs=[]
-for i00 in range(100):
+for i00 in range(10):
     NN=NeuralNet4(deepcopy(NetSize),[])
     optim = torch.optim.Adam(NN.parameters(),lr=.0001)
     Turns=[]

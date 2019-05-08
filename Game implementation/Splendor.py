@@ -107,8 +107,6 @@ class Splendor:
         self.player[playern].gems+=gems
         
     def CheckBuy(self,playern,cardn,gems):
-        print(len(self.cards))
-        print(cardn+1)
         if len(self.cards)<cardn+1: return 0
         if min(self.player[playern].gems-gems)<0: return 0
         if not min(gems%1==[0,0,0,0,0,0]): return 0
@@ -137,6 +135,7 @@ class Splendor:
         if min(self.player[playern].gems+gems)<0: return 0
         if not min(gems%1==[0,0,0,0,0,0]): return 0           #Check if numbers are integers
         if max(gems)>2: return 0
+        if sum(self.player[playern].gems+gems)>10: return 0
         if max(gems)==2:                   #2 of one type
             s=np.sort(gems)
             if s[-2]>0: return 0

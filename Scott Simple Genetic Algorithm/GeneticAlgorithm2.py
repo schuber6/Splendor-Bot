@@ -30,15 +30,15 @@ if not cont:
     AvScores=[]
 
     Nnets=100  #Number of nets each generation
-    Ngames=10  #Number of games to play to determine each net's score
-    MaxTurns=13  #Max turns after which testing is stopped
-    Ngens=25  #Number of generations to run
+    Ngames=15  #Number of games to play to determine each net's score
+    MaxTurns=17  #Max turns after which testing is stopped
+    Ngens=100  #Number of generations to run
     Stall=20  #Number of gens to wait before decreasing step
     Stallp=.3  #Factor to decrease step by when algorithm is stalled
     step=1
     mutation=1  #Type of mutation--1 is simple adding of random numbers (other types don't seem much better)
-    Levels=0  #Number of levels deep to search decision space to look for best move
-    GameType=0  #Type of Splendor game: 0 is simplest, 1 somewhat more complex
+    Levels=1  #Number of levels deep to search decision space to look for best move
+    GameType=1  #Type of Splendor game: 0 is simplest, 1 somewhat more complex
     lastdrop=0
     NetSize=[46,30,26]  #Size of NN layers
     pAddNeuron=0  #Probability to add/subtract neuron during mutation
