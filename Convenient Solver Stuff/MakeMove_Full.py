@@ -22,8 +22,6 @@ def MakeMove(Game,playern,NN,Levels):
     IV=InputVector_Full(Game,102)
     Out=NN(torch.FloatTensor(IV))
     Out=np.array(Out)
-    np.random.seed()
-    
     GMoves=RankMoves(Out,Game,Player,playern)
     if GMoves:
         MakeMove_GMove(Game,playern,GMoves[0])
@@ -125,31 +123,37 @@ def RankMoves(Out,Game,Player,playern): #Ranks top 10 moves based on "Out" value
                 GMoves.append(A)
     return GMoves
     
-def MakeMove_TreeSearch(Game,playern,Player,NN,Levels):
-    TopMoves=5
-    IV=InputVector_Simple(Game,46)
-    #NN=Neural_Network([len(IV),30,26],Weights)
+def MakeMove_TreeSearch(Game,playern,NN,Levels,TopMoves):
+    #Levels determines the number of moves to look ahead (-1 means none)
+    Player=Game.player[playern]
+    IV=InputVector_Full(Game,102)
     Out=NN(torch.FloatTensor(IV))
     Out=np.array(Out)
-    #Out=np.random.rand(26)   #Replace NN output with random vector
     GMoves=RankMoves(Out,Game,Player,playern)
     if Levels==-1:   #A way to generalize to non-tree searched models
         if GMoves:
-            return 0,GMoves[0]
+            return 0,GMoves[0],np.inf
         else:
-            return 0,[]
+            return 0,[],np.inf
     BestScore=-1
+    BestTurnsToWin=np.inf
     BestMove=[]
-    for i in range(np.min([TopMoves,len(GMoves)])):
+    for i in range(int(np.min([TopMoves,len(GMoves)]))):
         G=deepcopy(Game)
         G=MakeMove_GMove(G,playern,GMoves[i])
         score=G.player[playern].VPs
-        if Levels!=0 and BestScore<15 and score<15:
-            score,Move=MakeMove_TreeSearch(G,playern,Player,NN,Levels-1)
-        if score>BestScore:
+        if score>=15:
+            TurnsToWin=1
+        else:
+            TurnsToWin=np.inf
+        if Levels!=0 and BestTurnsToWin>1 and score<15:
+            score,Move,TurnsToWin=MakeMove_TreeSearch(G,playern,NN,Levels-1,TopMoves)
+            TurnsToWin+=1
+        if TurnsToWin<BestTurnsToWin or (BestTurnsToWin == np.inf and score>BestScore):
             BestScore=score
             BestMove=GMoves[i]
-    return BestScore,BestMove
+            BestTurnsToWin=TurnsToWin
+    return BestScore,BestMove,BestTurnsToWin
 
         
         
